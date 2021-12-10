@@ -2,7 +2,20 @@
 
 > The Dockerfiles used to build the images that the Polar app needs to spin up nodes quickly across multiple operating systems.
 
-_Warning: These images are not hardened and shouldn't be used to store real bitcoin. These images are intended solely to be used in simnet/regtest environments_
+_Warning: These images are not hardened and shouldn't be used to store real bitcoin. These images are intended solely to be used in regtest environments_
+
+Creating multi-arch images for Polar makes use of the `docker buildx` command. It is a good idea to create a separate builder using the commands below.
+
+```
+// create the builder
+$ docker buildx create --use --name polar-builder
+
+// use the builder
+$ docker buildx use polar-builder
+
+// bootstrap the builder
+$ docker buildx inspect --bootstrap
+```
 
 ## Bitcoin Core
 
@@ -21,16 +34,10 @@ _Warning: These images are not hardened and shouldn't be used to store real bitc
 
 ```sh
 $ cd bitcoind
-$ docker build --build-arg BITCOIN_VERSION=<version> -t polarlightning/bitcoind:<version> .
+$ docker buildx build  --platform linux/amd64,linux/arm64 --build-arg BITCOIN_VERSION=22.0  -t polarlightning/bitcoind:22.0  --push  .
 ```
 
 Replace `<version>` with the desired bitcoind version (ex: `0.18.1`)
-
-**Push to Docker Hub**
-
-```sh
-$ docker push polarlightning/bitcoind:<version>
-```
 
 ## LND
 
@@ -57,7 +64,7 @@ $ docker push polarlightning/bitcoind:<version>
 
 ```sh
 $ cd lnd
-$ docker build --build-arg LND_VERSION=<version> -t polarlightning/lnd:<version> .
+$ docker buildx build  --platform linux/amd64,linux/arm64 --build-arg LND_VERSION=0.14.1-beta -t polarlightning/lnd:0.14.1-beta  --push  .
 ```
 
 Replace `<version>` with the desired LND version (ex: `0.7.1-beta`)
@@ -72,6 +79,7 @@ $ docker push polarlightning/lnd:<version>
 
 ### Tags
 
+- `0.10.2` ([clightning/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/clightning/Dockerfile))
 - `0.10.0` ([clightning/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/clightning/Dockerfile))
 - `0.9.3` ([clightning/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/clightning/Dockerfile))
 - `0.9.2` ([clightning/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/clightning/Dockerfile))
@@ -100,6 +108,7 @@ $ docker push polarlightning/clightning:<version>
 
 ### Tags
 
+- `0.6.2` ([eclair/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/eclair/Dockerfile))
 - `0.6.1` ([eclair/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/eclair/Dockerfile))
 - `0.6.0` ([eclair/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/eclair/Dockerfile))
 - `0.5.0` ([eclair/Dockerfile](https://github.com/jamaljsr/polar/blob/master/docker/eclair/Dockerfile))
@@ -111,6 +120,7 @@ $ docker push polarlightning/clightning:<version>
 ```sh
 $ cd eclair
 $ docker build --build-arg ECLAIR_VERSION=<version> -t polarlightning/eclair:<version> .
+$ docker buildx build  --platform linux/amd64,linux/arm64 --build-arg ECLAIR_VERSION=0.6.2 -t polarlightning/eclair:0.6.2  --push  .
 ```
 
 Replace `<version>` with the desired Eclair version (ex: `0.3.3`).
